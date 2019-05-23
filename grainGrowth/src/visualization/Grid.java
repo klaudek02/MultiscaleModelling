@@ -17,9 +17,10 @@ public class Grid {
     private boolean[][] oldState;
     private int radius;
     private Random generator;
+
     public Grid(int n, int m) {
-        resize(n, m);
         generator = new Random();
+        resize(n, m);
     }
 
     void initializeCells() {
@@ -27,16 +28,18 @@ public class Grid {
         oldState = new boolean[numberOfRows][numberOfColumns];
         for (int i = 0; i < numberOfRows; i++)
             for (int j = 0; j < numberOfColumns; j++) {
-                cells[i][j] = new Cell();
-//                cells[i][j].setCenterOfGravity(generator.nextDouble(), generator.nextDouble());
+                cells[i][j] = new Cell(generator.nextDouble()+i, generator.nextDouble()+j);
             }
     }
+
     public void updateCell(int i, int j) {
         cells[i][j].negateAlive();
     }
+
     public void nextGeneration() {
         goToNextState(calculateNextState());
     }
+
     private void goToNextState(boolean[][] nextState) {
         for (int i = 0; i < getNumberOfRows(); i++) {
             for (int j = 0; j < getNumberOfColumns(); j++) {
@@ -47,6 +50,7 @@ public class Grid {
         }
         oldState = nextState;
     }
+
     private boolean[][] calculateNextState() {
         boolean[][] nextState = new boolean[getNumberOfRows()][getNumberOfColumns()];
 
@@ -66,8 +70,9 @@ public class Grid {
         });
         return nextState;
     }
-    private int checkNextGrainType(int rownIndex, int columnIndex) {
-        List<Cell> collect = getNeighbours(rownIndex, columnIndex).stream()
+
+    private int checkNextGrainType(int rowIndex, int columnIndex) {
+        List<Cell> collect = getNeighbours(rowIndex, columnIndex).stream()
                 .filter(Cell::isAlive).collect(Collectors.toList());
         if (collect.size() > 0) {
             Map<Integer, Integer> map = new HashMap<>();
@@ -85,6 +90,7 @@ public class Grid {
         } else return -1;
 
     }
+
     private List<Cell> getNeighbours(int rowIndex, int columnIndex) {
         int north = rowIndex - 1;
         int east = columnIndex + 1;
@@ -139,7 +145,7 @@ public class Grid {
                 }
             }
             case RadiusWithCenterOfGravity: {
-                return radiusWithCenterOfGravity(north, east, south, west, columnIndex, rowIndex);
+                return radiusWithCenterOfGravity(columnIndex, rowIndex);
             }
             default:
                 return Arrays.asList();
@@ -148,19 +154,26 @@ public class Grid {
 
 
     }
-    private List<Cell> radiusWithCenterOfGravity(int north, int east, int south, int west, int columnIndex, int rowIndex) {
+
+    private List<Cell> radiusWithCenterOfGravity(int columnIndex, int rowIndex) {
         List<Cell> neighbours = new LinkedList<>();
+        Cell cell;
         for (int x = rowIndex - radius; x <= rowIndex + radius; x++) {
             for (int y = columnIndex - radius; y <= columnIndex + radius; y++) {
-                if (x >= 0 && x < numberOfRows && y >= 0 && y <numberOfColumns &&
-                        Math.sqrt(Math.abs(((x - rowIndex) * (x - rowIndex)) + (y - columnIndex) * (y - columnIndex))) <= radius){
-                        if (getCell(x,y).isAlive())
-                        neighbours.add(getCell(x,y));
+                if (x >= 0 && x < numberOfRows && y >= 0 && y < numberOfColumns) {
+                    cell = getCell(x, y);
+                    if (cell.isAlive()) {
+                        if (Math.sqrt(Math.abs((Math.pow(cell.getCenterOfGravityX() - rowIndex, 2) +
+                                Math.pow(cell.getCenterOfGravityY() - columnIndex, 2)))) <= radius) {
+                            neighbours.add(cell);
+                        }
+                    }
                 }
             }
         }
         return neighbours;
     }
+
     private List<Cell> hexagonalRight(int north, int east, int south, int west, int columnIndex, int rowIndex) {
         return Arrays.asList(
                 getCell(north, columnIndex),
@@ -171,6 +184,7 @@ public class Grid {
                 getCell(rowIndex, west)
         );
     }
+
     private List<Cell> hexagonalLeft(int north, int east, int south, int west, int columnIndex, int rowIndex) {
         return Arrays.asList(
                 getCell(north, west),
@@ -183,6 +197,7 @@ public class Grid {
 
 
     }
+
     private List<Cell> pentagonalDown(int north, int east, int south, int west, int columnIndex, int rowIndex) {
         return Arrays.asList(
                 getCell(rowIndex, east),
@@ -192,6 +207,7 @@ public class Grid {
                 getCell(rowIndex, west)
         );
     }
+
     private List<Cell> pentagonalUp(int north, int east, int south, int west, int columnIndex, int rowIndex) {
         return Arrays.asList(
                 getCell(north, west),
@@ -201,6 +217,7 @@ public class Grid {
                 getCell(rowIndex, west)
         );
     }
+
     private List<Cell> pentagonalRight(int north, int east, int south, int west, int columnIndex, int rowIndex) {
         return Arrays.asList(
                 getCell(north, west),
@@ -210,6 +227,7 @@ public class Grid {
                 getCell(rowIndex, west)
         );
     }
+
     private List<Cell> pentagonalLeft(int north, int east, int south, int west, int columnIndex, int rowIndex) {
         return Arrays.asList(
                 getCell(north, columnIndex),
@@ -219,11 +237,13 @@ public class Grid {
                 getCell(south, columnIndex)
         );
     }
+
     public void resize(int n, int m) {
         numberOfRows = n;
         numberOfColumns = m;
         initializeCells();
     }
+
     public void setGrainsRandom(int numberOfGrains) {
         for (int i = 1; i <= numberOfGrains; i++) {
             int row = generator.nextInt(numberOfRows);
@@ -234,26 +254,29 @@ public class Grid {
             } else i--;
         }
     }
+
     public void setGrainsCustom(int numberOfGrains) {
         this.numberOfGrains = numberOfGrains;
         counterGrain = 1;
     }
+
     public void setGrainsHomogeneous(int homogeneousRows, int homogeneousColumns) {
         if (numberOfRows >= homogeneousRows && numberOfColumns >= homogeneousColumns
                 && numberOfColumns * numberOfRows >= homogeneousColumns * homogeneousRows) {
-            int rowStep =(int) Math.ceil(numberOfRows / (double)homogeneousRows);
-            int columnStep =(int) Math.ceil(numberOfColumns /(double) homogeneousColumns);
+            int rowStep = (int) Math.ceil(numberOfRows / (double) homogeneousRows);
+            int columnStep = (int) Math.ceil(numberOfColumns / (double) homogeneousColumns);
             int counter = 1;
             for (int i = 0; i < numberOfRows; i += rowStep) {
                 for (int j = 0; j < numberOfColumns; j += columnStep) {
-                    cells[rowStep/2+i][columnStep/2+j].setGrainNumber(counter++);
-                    cells[rowStep/2+i][columnStep/2+j].negateAlive();
+                    cells[rowStep / 2 + i][columnStep / 2 + j].setGrainNumber(counter++);
+                    cells[rowStep / 2 + i][columnStep / 2 + j].negateAlive();
                 }
             }
 
         }
 
     }
+
     public void setGrainsWithRadius(int numberOfGrains) {
         int failedCounter = 0;
         boolean valid = true;
@@ -300,17 +323,20 @@ public class Grid {
     public void setBoundaryCondition(BoundaryCondition boundaryCondition) {
         this.boundaryCondition = boundaryCondition;
     }
+
     public void setRadius(int radius) {
         this.radius = radius;
     }
+
     public void setGrowthType(GrowthType growthType) {
         this.growthType = growthType;
     }
+
     public Cell getCell(int rowIndex, int columnIndex) {
         switch (boundaryCondition) {
             case Absorbing:
                 if (rowIndex < 0 || rowIndex >= numberOfRows || columnIndex < 0 || columnIndex >= numberOfColumns)
-                    return new Cell();
+                    return new Cell(0,0);
                 else
                     return cells[rowIndex][columnIndex];
             case Periodic:
@@ -321,15 +347,19 @@ public class Grid {
         }
 
     }
+
     private int getPeriodicRow(int rowIndex) {
         return (rowIndex + getNumberOfRows()) % getNumberOfRows();
     }
+
     private int getPeriodicColumn(int columnIndex) {
         return (columnIndex + getNumberOfColumns()) % getNumberOfColumns();
     }
+
     public int getNumberOfRows() {
         return numberOfRows;
     }
+
     public int getNumberOfColumns() {
         return numberOfColumns;
     }

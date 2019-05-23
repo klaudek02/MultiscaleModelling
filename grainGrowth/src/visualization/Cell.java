@@ -10,6 +10,11 @@ public class Cell {
     private double centerOfGravityX;
     private double centerOfGravityY;
 
+    public Cell(double centerOfGravityX, double centerOfGravityY) {
+        this.centerOfGravityX = centerOfGravityX;
+        this.centerOfGravityY = centerOfGravityY;
+    }
+
     public boolean isAlive() {
         return alive.get();
     }
@@ -33,4 +38,11 @@ public class Cell {
         this.centerOfGravityX = x;
         this.centerOfGravityY = y;
     };
+    public double getCenterOfGravityX() {
+        return centerOfGravityX;
+    }
+
+    public double getCenterOfGravityY() {
+        return centerOfGravityY;
+    }
 }
