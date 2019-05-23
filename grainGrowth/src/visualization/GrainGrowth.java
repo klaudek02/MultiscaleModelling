@@ -51,16 +51,17 @@ public class GrainGrowth {
        if(playable)timeline.stop();
     }
     public void setInstance(int numberOfGrains, BoundaryCondition boundaryCondition,
-                            NucleationType nucleationType, GrowthType growthType,
-                            int homogeneousRows, int homogeneousColumns, int radius) {
+                            NucleationType nucleationType, NeighborhoodType neighborhoodType,
+                            int homogeneousRows, int homogeneousColumns, double radiusNucleation, double radiusNeighborhood) {
         stopGame();
         this.numberOfGrains = numberOfGrains;
         this.nucleationType = nucleationType;
         this.homogeneousRows = homogeneousRows;
         this.homogeneousColumns = homogeneousColumns;
-        grid.setRadius(radius);
+        grid.setRadiusNucleation(radiusNucleation);
+        grid.setRadiusNeighborhood(radiusNeighborhood);
         grid.setBoundaryCondition(boundaryCondition);
-        grid.setGrowthType(growthType);
+        grid.setNeighborhoodType(neighborhoodType);
     }
     public void doNucleationType() {
         switch (nucleationType)

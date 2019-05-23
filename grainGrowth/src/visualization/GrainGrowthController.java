@@ -24,30 +24,31 @@ public class GrainGrowthController implements Initializable {
     @FXML private TextField numberOfGrains;
     @FXML private ComboBox<BoundaryCondition> boundaryConditions;
     @FXML private GridPane visualizationGridPane;
-    @FXML private ComboBox<GrowthType> growthTypes;
+    @FXML private ComboBox<NeighborhoodType> growthTypes;
     @FXML private Button resumeButton;
     @FXML private Text errorText;
+    @FXML private TextField radiusNucleation;
+    @FXML private TextField radiusNeighborhood;
 
     private GrainGrowth grainGrowth;
 
     private String[] grainColors;
-
-    private List<StackPane> squares;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
         grainGrowth = new GrainGrowth(60, 40);
         boundaryConditions.setItems(FXCollections.observableArrayList(BoundaryCondition.values()));
         nucleationTypes.setItems(FXCollections.observableArrayList(NucleationType.values()));
-        growthTypes.setItems(FXCollections.observableArrayList(GrowthType.values()));
+        growthTypes.setItems(FXCollections.observableArrayList(NeighborhoodType.values()));
         stopButton.setOnAction(e -> grainGrowth.stopGame());
         resumeButton.setOnAction(e -> grainGrowth.playGame());
         startButton.setOnAction(e -> {
             errorText.setText("");
-            int n =0, m=0, homogeneousRows =0 , homogeneousColumns =0, numOfGrains=0, radius = 5;
+            int n, m, homogeneousRows =0 , homogeneousColumns =0, numOfGrains;
+            double radiusNucleation = 0.0, radiusNeighborhood = 0.0;
             BoundaryCondition boundaryCondition = boundaryConditions.getValue();
             NucleationType nucleationType = nucleationTypes.getValue();
-            GrowthType growthType = growthTypes.getValue();
+            NeighborhoodType neighborhoodType = growthTypes.getValue();
             try {
                 n = Integer.parseInt(nSize.getText());
                 m = Integer.parseInt(mSize.getText());
@@ -55,14 +56,20 @@ public class GrainGrowthController implements Initializable {
                     homogeneousRows = Integer.parseInt(this.homogeneousRows.getText());
                     homogeneousColumns = Integer.parseInt(this.homogeneousColumns.getText());
                     numOfGrains = homogeneousColumns*homogeneousRows;
+                }else if(nucleationType.equals(NucleationType.WithRadius)){
+                    numOfGrains = Integer.parseInt(numberOfGrains.getText());
+                    radiusNucleation = Double.parseDouble(this.radiusNucleation.getText());
+
                 }else
                     numOfGrains = Integer.parseInt(numberOfGrains.getText());
-                if(validateInputs(boundaryCondition,nucleationType,growthType,
-                        n,m,homogeneousColumns,homogeneousRows,numOfGrains)) {
+                if(neighborhoodType.equals(NeighborhoodType.RadiusWithCenterOfGravity))
+                    radiusNeighborhood = Double.parseDouble(this.radiusNeighborhood.getText());
+                if(validateInputs(boundaryCondition,nucleationType, neighborhoodType,
+                        n,m,homogeneousColumns,homogeneousRows,numOfGrains,radiusNucleation, radiusNeighborhood)) {
                     makeColorsForGrains(numOfGrains);
                     grainGrowth.setInstance(numOfGrains, boundaryCondition,
-                            nucleationType, growthType,
-                            homogeneousRows, homogeneousColumns, radius);
+                            nucleationType, neighborhoodType,
+                            homogeneousRows, homogeneousColumns, radiusNucleation, radiusNeighborhood);
                     resizeVisualization(n, m, numOfGrains);
                     grainGrowth.doNucleationType();
                     grainGrowth.setPlayable();
@@ -76,9 +83,9 @@ public class GrainGrowthController implements Initializable {
     }
 
     private boolean validateInputs(BoundaryCondition boundaryCondition, NucleationType nucleationType,
-                                   GrowthType growthType, int n, int m, int homogeneousColumns,
-                                   int homogeneousRows, int numOfGrains) {
-        if(boundaryCondition == null || nucleationType == null || growthType == null){
+                                   NeighborhoodType neighborhoodType, int n, int m, int homogeneousColumns,
+                                   int homogeneousRows, int numOfGrains, double radiusNucleation, double radiusNeighborhood) {
+        if(boundaryCondition == null || nucleationType == null || neighborhoodType == null){
             printError("select every option");
             return false;
         }else if(n <= 0 || m <= 0){
@@ -90,7 +97,7 @@ public class GrainGrowthController implements Initializable {
         }else if( numOfGrains<=0 || numOfGrains > n*m){
             printError("wrong number of grains");
             return false;
-        }
+        }//else if( radius <= 1)
         return true;
     }
 

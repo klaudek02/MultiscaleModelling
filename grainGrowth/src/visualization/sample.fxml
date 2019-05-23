@@ -21,16 +21,20 @@
                 <ComboBox fx:id="nucleationTypes" layoutX="19.0" layoutY="122.0" prefWidth="150.0" />
                 <TextField fx:id="homogeneousRows" layoutX="18.0" layoutY="195.0" prefHeight="25.0" prefWidth="41.0" />
                 <TextField fx:id="homogeneousColumns" layoutX="73.0" layoutY="195.0" prefHeight="25.0" prefWidth="41.0" />
-                <ComboBox fx:id="boundaryConditions" layoutX="19.0" layoutY="249.0" prefWidth="150.0" />
-                <ComboBox fx:id="growthTypes" layoutX="19.0" layoutY="301.0" prefWidth="150.0" />
-                <TextField fx:id="numberOfGrains" layoutX="18.0" layoutY="377.0" prefHeight="25.0" prefWidth="41.0" />
-                <Button fx:id="startButton" layoutX="86.0" layoutY="377.0" mnemonicParsing="false" text="START" />
-                <Button fx:id="resumeButton" layoutX="34.0" layoutY="426.0" mnemonicParsing="false" text="RESUME" />
-                <Button fx:id="stopButton" layoutX="114.0" layoutY="426.0" mnemonicParsing="false" text="STOP" />
+                <ComboBox fx:id="boundaryConditions" layoutX="19.0" layoutY="249.0" prefWidth="200.0" />
+                <ComboBox fx:id="growthTypes" layoutX="19.0" layoutY="301.0" prefWidth="200.0" />
+                <TextField fx:id="numberOfGrains" layoutX="18.0" layoutY="365.0" prefHeight="25.0" prefWidth="41.0" />
+                <TextField fx:id="radiusNucleation" layoutX="18.0" layoutY="416.0" prefHeight="25.0" prefWidth="41.0" />
+                <TextField fx:id="radiusNeighborhood" layoutX="118.0" layoutY="416.0" prefHeight="25.0" prefWidth="41.0" />
+                <Button fx:id="startButton" layoutX="86.0" layoutY="456.0" mnemonicParsing="false" text="START" />
+                <Button fx:id="resumeButton" layoutX="34.0" layoutY="550.0" mnemonicParsing="false" text="RESUME" />
+                <Button fx:id="stopButton" layoutX="114.0" layoutY="550.0" mnemonicParsing="false" text="STOP" />
                 <Label layoutX="16.0" layoutY="98.0" text="Nucleation types" />
                 <Label layoutX="20.0" layoutY="31.0" text="Grid size (NxM)" />
                 <Label layoutX="18.0" layoutY="231.0" text="Boundary conditions" />
                 <Label layoutX="18.0" layoutY="346.0" text="Number of grains" />
+                <Label layoutX="18.0" layoutY="400.0" text="Radius nucleation" />
+                <Label layoutX="118.0" layoutY="400.0" text="Radius neighborhood" />
                 <Label layoutX="16.0" layoutY="283.0" text="Growth Type" />
                 <Label fx:id="homogeneousLabel" layoutX="20.0" layoutY="171.0" text="Homogeneous options" />
                 <Text fx:id="errorText" fill="RED" layoutX="12.0" layoutY="493.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="176.80340576171875" />

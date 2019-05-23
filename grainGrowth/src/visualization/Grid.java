@@ -11,12 +11,13 @@ public class Grid {
     private int numberOfRows;
     private int numberOfColumns;
     private BoundaryCondition boundaryCondition;
-    private GrowthType growthType;
+    private NeighborhoodType neighborhoodType;
     int counterGrain = 1;
     int numberOfGrains;
     private boolean[][] oldState;
-    private int radius;
     private Random generator;
+    private double radiusNucleation;
+    private double radiusNeighborhood;
 
     public Grid(int n, int m) {
         generator = new Random();
@@ -96,7 +97,7 @@ public class Grid {
         int east = columnIndex + 1;
         int south = rowIndex + 1;
         int west = columnIndex - 1;
-        switch (growthType) {
+        switch (neighborhoodType) {
             case VonNeumann: {
                 return Arrays.asList(
                         getCell(north, columnIndex),
@@ -157,14 +158,15 @@ public class Grid {
 
     private List<Cell> radiusWithCenterOfGravity(int columnIndex, int rowIndex) {
         List<Cell> neighbours = new LinkedList<>();
-        Cell cell;
-        for (int x = rowIndex - radius; x <= rowIndex + radius; x++) {
-            for (int y = columnIndex - radius; y <= columnIndex + radius; y++) {
+        Cell cell,cell2;
+        for (double x = rowIndex - radiusNeighborhood; x <= rowIndex + radiusNeighborhood; x++) {
+            for (double y = columnIndex - radiusNeighborhood; y <= columnIndex + radiusNeighborhood; y++) {
                 if (x >= 0 && x < numberOfRows && y >= 0 && y < numberOfColumns) {
-                    cell = getCell(x, y);
+                    cell = getCell((int)x, (int)y);
+                    cell2 = getCell(rowIndex,columnIndex);
                     if (cell.isAlive()) {
-                        if (Math.sqrt(Math.abs((Math.pow(cell.getCenterOfGravityX() - rowIndex, 2) +
-                                Math.pow(cell.getCenterOfGravityY() - columnIndex, 2)))) <= radius) {
+                        if (Math.sqrt(Math.abs((Math.pow(cell.getCenterOfGravityX() - cell2.getCenterOfGravityX(), 2) +
+                                Math.pow(cell.getCenterOfGravityY() - cell2.getCenterOfGravityY(), 2)))) <= radiusNeighborhood) {
                             neighbours.add(cell);
                         }
                     }
@@ -284,11 +286,12 @@ public class Grid {
             int x1 = generator.nextInt(numberOfRows);
             int y1 = generator.nextInt(numberOfColumns);
             if (!cells[x1][y1].isAlive()) {
-                for (int x = x1 - radius; x <= x1 + radius; x++) {
-                    for (int y = y1 - radius; y <= y1 + radius; y++) {
+                for (double x = x1 - radiusNucleation; x <= x1 + radiusNucleation; x++) {
+                    for (double y = y1 - radiusNucleation; y <= y1 + radiusNucleation; y++) {
                         if (x >= 0 && x < numberOfRows && y >= 0 && y <
-                                numberOfColumns && Math.sqrt(Math.abs(((x - x1) * (x - x1)) + (y - y1) * (y - y1))) <= radius) {
-                            if (cells[x][y].isAlive()) {
+                                numberOfColumns && Math.sqrt(Math.abs(Math.pow((x - x1) * (x - x1),2)+
+                                Math.pow((y - y1) * (y - y1),2))) <= radiusNucleation) {
+                            if (getCell((int)x,(int)y).isAlive()) {
                                 valid = false;
                                 break;
                             }
@@ -308,7 +311,7 @@ public class Grid {
                 failedCounter++;
             }
 
-            if (failedCounter == 1000000) break;
+            if (failedCounter == 10000) break;
         }
     }
 
@@ -324,12 +327,8 @@ public class Grid {
         this.boundaryCondition = boundaryCondition;
     }
 
-    public void setRadius(int radius) {
-        this.radius = radius;
-    }
-
-    public void setGrowthType(GrowthType growthType) {
-        this.growthType = growthType;
+    public void setNeighborhoodType(NeighborhoodType neighborhoodType) {
+        this.neighborhoodType = neighborhoodType;
     }
 
     public Cell getCell(int rowIndex, int columnIndex) {
@@ -362,6 +361,14 @@ public class Grid {
 
     public int getNumberOfColumns() {
         return numberOfColumns;
+    }
+
+    public void setRadiusNucleation(double radiusNucleation) {
+        this.radiusNucleation = radiusNucleation;
+    }
+
+    public void setRadiusNeighborhood(double radiusNeighborhood) {
+        this.radiusNeighborhood = radiusNeighborhood;
     }
 }
 

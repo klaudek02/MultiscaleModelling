@@ -1,6 +1,6 @@
 package visualization;
 
-public enum GrowthType {
+public enum NeighborhoodType {
 
     VonNeumann,
     Moore,
