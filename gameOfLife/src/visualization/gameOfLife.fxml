@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" fx:controller="visualization.GameOfLifeController" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <right>
+      <AnchorPane fx:id="menuPane" prefHeight="400.0" prefWidth="119.0" style="-fx-background-color: pink;" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="startButton" layoutX="7.0" layoutY="257.0" mnemonicParsing="false" text="START" />
+            <Button fx:id="stopButton" layoutX="66.0" layoutY="257.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="51.0" text="STOP" />
+            <ChoiceBox fx:id="stateChoiceBox" layoutX="6.0" layoutY="188.0" prefHeight="25.0" prefWidth="105.0" />
+            <TextField fx:id="nSizeField" layoutX="6.0" layoutY="26.0" prefHeight="25.0" prefWidth="52.0" />
+            <TextField fx:id="mSizeField" layoutX="65.0" layoutY="26.0" prefHeight="25.0" prefWidth="52.0" />
+            <Button fx:id="updateButton" layoutX="7.0" layoutY="66.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="104.0" text="UPDATE" />
+         </children>
+      </AnchorPane>
+   </right>
+   <center>
+      <AnchorPane fx:id="wrapperOfVisualization" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: pink;" BorderPane.alignment="CENTER">
+         <children>
+            <GridPane fx:id="visualizationPane" prefHeight="400.0" prefWidth="529.0" style="-fx-background-color: white;" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="8.0">
+              <columnConstraints>
+              </columnConstraints>
+              <rowConstraints>
+              </rowConstraints>
+            </GridPane>
+         </children>
+      </AnchorPane>
+   </center>
+</BorderPane>

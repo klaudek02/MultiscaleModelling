@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/MultiscaleModelling.iml" filepath="$PROJECT_DIR$/MultiscaleModelling.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cellularAutomaton/cellularAutomaton.iml" filepath="$PROJECT_DIR$/cellularAutomaton/cellularAutomaton.iml" />
+      <module fileurl="file://$PROJECT_DIR$/gameOfLife/gameOfLife.iml" filepath="$PROJECT_DIR$/gameOfLife/gameOfLife.iml" />
+      <module fileurl="file://$PROJECT_DIR$/grainGrowth/grainGrowth.iml" filepath="$PROJECT_DIR$/grainGrowth/grainGrowth.iml" />
+    </modules>
+  </component>
+</project>
