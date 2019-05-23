@@ -67,7 +67,9 @@ public class GrainGrowthController implements Initializable {
                     grainGrowth.doNucleationType();
                     grainGrowth.setPlayable();
                 }
-            }catch (NumberFormatException exception){printError("Wrong input data");};
+            }catch (NumberFormatException exception){
+                printError("Wrong input data");
+            };
 
 
         });

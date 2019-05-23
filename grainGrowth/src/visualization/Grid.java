@@ -148,18 +148,19 @@ public class Grid {
 
 
     }
-
     private List<Cell> radiusWithCenterOfGravity(int north, int east, int south, int west, int columnIndex, int rowIndex) {
+        List<Cell> neighbours = new LinkedList<>();
         for (int x = rowIndex - radius; x <= rowIndex + radius; x++) {
             for (int y = columnIndex - radius; y <= columnIndex + radius; y++) {
-                if (x >= 0 && x < numberOfRows && y >= 0 && y <numberOfColumns && getCell(x,y).isAlive()){
-
+                if (x >= 0 && x < numberOfRows && y >= 0 && y <numberOfColumns &&
+                        Math.sqrt(Math.abs(((x - rowIndex) * (x - rowIndex)) + (y - columnIndex) * (y - columnIndex))) <= radius){
+                        if (getCell(x,y).isAlive())
+                        neighbours.add(getCell(x,y));
                 }
             }
         }
-        return null;
+        return neighbours;
     }
-
     private List<Cell> hexagonalRight(int north, int east, int south, int west, int columnIndex, int rowIndex) {
         return Arrays.asList(
                 getCell(north, columnIndex),
@@ -218,34 +219,6 @@ public class Grid {
                 getCell(south, columnIndex)
         );
     }
-
-    public Cell getCell(int rowIndex, int columnIndex) {
-        switch (boundaryCondition) {
-            case Absorbing:
-                if (rowIndex < 0 || rowIndex >= numberOfRows || columnIndex < 0 || columnIndex >= numberOfColumns)
-                    return new Cell();
-                else
-                    return cells[rowIndex][columnIndex];
-            case Periodic:
-                return cells[getPeriodicRow(rowIndex)][getPeriodicColumn(columnIndex)];
-            default:
-                return null;
-
-        }
-
-    }
-    private int getPeriodicRow(int rowIndex) {
-        return (rowIndex + getNumberOfRows()) % getNumberOfRows();
-    }
-    private int getPeriodicColumn(int columnIndex) {
-        return (columnIndex + getNumberOfColumns()) % getNumberOfColumns();
-    }
-    public int getNumberOfRows() {
-        return numberOfRows;
-    }
-    public int getNumberOfColumns() {
-        return numberOfColumns;
-    }
     public void resize(int n, int m) {
         numberOfRows = n;
         numberOfColumns = m;
@@ -261,9 +234,6 @@ public class Grid {
             } else i--;
         }
     }
-    public void setGrowthType(GrowthType growthType) {
-        this.growthType = growthType;
-    }
     public void setGrainsCustom(int numberOfGrains) {
         this.numberOfGrains = numberOfGrains;
         counterGrain = 1;
@@ -275,9 +245,9 @@ public class Grid {
             int columnStep =(int) Math.ceil(numberOfColumns /(double) homogeneousColumns);
             int counter = 1;
             for (int i = 0; i < numberOfRows; i += rowStep) {
-                for (int j = 0; i < numberOfColumns; j += columnStep) {
-                    cells[i][j].setGrainNumber(counter++);
-                    cells[i][j].negateAlive();
+                for (int j = 0; j < numberOfColumns; j += columnStep) {
+                    cells[rowStep/2+i][columnStep/2+j].setGrainNumber(counter++);
+                    cells[rowStep/2+i][columnStep/2+j].negateAlive();
                 }
             }
 
@@ -318,6 +288,7 @@ public class Grid {
             if (failedCounter == 1000000) break;
         }
     }
+
     public boolean setColorIdOnClick(int ii, int jj) {
         if (counterGrain <= numberOfGrains) {
             cells[ii][jj].setGrainNumber(counterGrain++);
@@ -325,12 +296,42 @@ public class Grid {
         }
         return false;
     }
+
     public void setBoundaryCondition(BoundaryCondition boundaryCondition) {
         this.boundaryCondition = boundaryCondition;
     }
-
     public void setRadius(int radius) {
         this.radius = radius;
+    }
+    public void setGrowthType(GrowthType growthType) {
+        this.growthType = growthType;
+    }
+    public Cell getCell(int rowIndex, int columnIndex) {
+        switch (boundaryCondition) {
+            case Absorbing:
+                if (rowIndex < 0 || rowIndex >= numberOfRows || columnIndex < 0 || columnIndex >= numberOfColumns)
+                    return new Cell();
+                else
+                    return cells[rowIndex][columnIndex];
+            case Periodic:
+                return cells[getPeriodicRow(rowIndex)][getPeriodicColumn(columnIndex)];
+            default:
+                return null;
+
+        }
+
+    }
+    private int getPeriodicRow(int rowIndex) {
+        return (rowIndex + getNumberOfRows()) % getNumberOfRows();
+    }
+    private int getPeriodicColumn(int columnIndex) {
+        return (columnIndex + getNumberOfColumns()) % getNumberOfColumns();
+    }
+    public int getNumberOfRows() {
+        return numberOfRows;
+    }
+    public int getNumberOfColumns() {
+        return numberOfColumns;
     }
 }
 
