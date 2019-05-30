@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Text?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="511.0" prefWidth="688.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="visualization.GrainGrowthController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="551.0" prefWidth="688.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="visualization.GrainGrowthController">
     <right>
         <AnchorPane prefHeight="447.0" prefWidth="241.0" BorderPane.alignment="CENTER">
             <children>
@@ -26,9 +26,14 @@
                 <TextField fx:id="numberOfGrains" layoutX="18.0" layoutY="365.0" prefHeight="25.0" prefWidth="41.0" />
                 <TextField fx:id="radiusNucleation" layoutX="18.0" layoutY="416.0" prefHeight="25.0" prefWidth="41.0" />
                 <TextField fx:id="radiusNeighborhood" layoutX="118.0" layoutY="416.0" prefHeight="25.0" prefWidth="41.0" />
-                <Button fx:id="startButton" layoutX="86.0" layoutY="456.0" mnemonicParsing="false" text="START" />
-                <Button fx:id="resumeButton" layoutX="34.0" layoutY="550.0" mnemonicParsing="false" text="RESUME" />
-                <Button fx:id="stopButton" layoutX="114.0" layoutY="550.0" mnemonicParsing="false" text="STOP" />
+                <Button fx:id="startButton" layoutX="18.0" layoutY="456.0" mnemonicParsing="false" text="START" />
+                <Button fx:id="resumeButton" layoutX="78.0" layoutY="456.0" mnemonicParsing="false" text="RESUME" />
+                <Button fx:id="stopButton" layoutX="148.0" layoutY="456.0" mnemonicParsing="false" text="STOP" />
+                <ComboBox fx:id="neighborhoodMC" layoutX="16.0" layoutY="520.0" prefWidth="200.0" />
+                <TextField fx:id="iterationsMC" layoutX="16.0" layoutY="570.0" prefHeight="25.0" prefWidth="41.0" />
+                <TextField fx:id="ktMC" layoutX="96.0" layoutY="570.0" prefHeight="25.0" prefWidth="41.0" />
+                <Button fx:id="monteCarlo" layoutX="96.0" layoutY="610.0" mnemonicParsing="false" text="Monte Carlo" />
+
                 <Label layoutX="16.0" layoutY="98.0" text="Nucleation types" />
                 <Label layoutX="20.0" layoutY="31.0" text="Grid size (NxM)" />
                 <Label layoutX="18.0" layoutY="231.0" text="Boundary conditions" />
@@ -36,14 +41,18 @@
                 <Label layoutX="18.0" layoutY="400.0" text="Radius nucleation" />
                 <Label layoutX="118.0" layoutY="400.0" text="Radius neighborhood" />
                 <Label layoutX="16.0" layoutY="283.0" text="Growth Type" />
-                <Label fx:id="homogeneousLabel" layoutX="20.0" layoutY="171.0" text="Homogeneous options" />
+                <Label layoutX="20.0" layoutY="171.0" text="Homogeneous options" />
+                <Label layoutX="16" layoutY="500" text="NeighborhoodMC"/>
+                <Label layoutX="16" layoutY="550" text="Iterations"/>
+                <Label layoutX="96" layoutY="550" text="KT"/>
+
                 <Text fx:id="errorText" fill="RED" layoutX="12.0" layoutY="493.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="176.80340576171875" />
 
             </children>
         </AnchorPane>
     </right>
     <left>
-        <GridPane fx:id="visualizationGridPane" gridLinesVisible="true" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="511.0" prefWidth="786.0" BorderPane.alignment="CENTER">
+        <GridPane fx:id="visualizationGridPane" gridLinesVisible="true" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="611.0" prefWidth="786.0" BorderPane.alignment="CENTER">
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />

@@ -6,7 +6,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 public class Cell {
 
     private final BooleanProperty alive = new SimpleBooleanProperty(false);
-    private int grainNumber = -1;
+    private int grainNumber = 0;
     private double centerOfGravityX;
     private double centerOfGravityY;
 
