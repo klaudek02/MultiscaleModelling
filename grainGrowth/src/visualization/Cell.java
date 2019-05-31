@@ -9,6 +9,8 @@ public class Cell {
     private int grainNumber = 0;
     private double centerOfGravityX;
     private double centerOfGravityY;
+    private double energy = 0;
+    private boolean changed = false;
 
     public Cell(double centerOfGravityX, double centerOfGravityY) {
         this.centerOfGravityX = centerOfGravityX;
@@ -45,4 +47,21 @@ public class Cell {
     public double getCenterOfGravityY() {
         return centerOfGravityY;
     }
+
+    public void setEnergy(double energy) {
+        this.energy = energy;
+    }
+
+    public double getEnergy(){
+        return this.energy;
+    }
+
+    public boolean isChanged() {
+        return changed;
+    }
+
+    public void setChanged(boolean changed) {
+        this.changed = changed;
+    }
 }
+

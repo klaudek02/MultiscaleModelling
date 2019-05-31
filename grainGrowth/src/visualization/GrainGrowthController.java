@@ -1,11 +1,15 @@
 package visualization;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 
@@ -53,19 +57,31 @@ public class GrainGrowthController implements Initializable {
     private Button monteCarlo;
     @FXML
     private ComboBox<NeighborhoodType> neighborhoodMC;
-    private GrainGrowth grainGrowth;
+    @FXML
+    private ToggleButton switchVisualization;
 
+    private GrainGrowth grainGrowth;
+    private VisualizationType visualizationType = VisualizationType.Microstructure;
     private String[] grainColors;
 
+    private StackPane[][] squares;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
-        grainGrowth = new GrainGrowth(60, 40);
+        grainGrowth = new GrainGrowth(60, 40, errorText);
         boundaryConditions.setItems(FXCollections.observableArrayList(BoundaryCondition.values()));
         nucleationTypes.setItems(FXCollections.observableArrayList(NucleationType.values()));
         growthTypes.setItems(FXCollections.observableArrayList(NeighborhoodType.values()));
         neighborhoodMC.setItems(FXCollections.observableArrayList(NeighborhoodType.Moore, NeighborhoodType.VonNeumann));
         stopButton.setOnAction(e -> grainGrowth.stopGame());
+        switchVisualization.setOnAction(e->{
+            grainGrowth.stopGame();
+            if(switchVisualization.isSelected()){
+                visualizationType = VisualizationType.Energy;
+            }else
+                visualizationType = VisualizationType.Microstructure;
+            changeColorsOnBoard();
+        });
         monteCarlo.setOnAction(e -> {
             try {
                 int kt = Integer.parseInt(ktMC.getText());
@@ -90,6 +106,7 @@ public class GrainGrowthController implements Initializable {
             try {
                 n = Integer.parseInt(nSize.getText());
                 m = Integer.parseInt(mSize.getText());
+                squares = new StackPane[n][m];
                 if (nucleationType.equals(NucleationType.Homogeneous)) {
                     homogeneousRows = Integer.parseInt(this.homogeneousRows.getText());
                     homogeneousColumns = Integer.parseInt(this.homogeneousColumns.getText());
@@ -121,6 +138,39 @@ public class GrainGrowthController implements Initializable {
         });
     }
 
+    private void changeColorsOnBoard() {
+        switch(visualizationType){
+            case Microstructure:
+                colorsMicrostructure();
+                break;
+            case Energy:
+                colorsEnergy();
+                break;
+                
+        }
+    }
+
+    private void colorsMicrostructure() {
+        Cell[][] cells = grainGrowth.getCells();
+        for(int i = 0; i < cells.length; i++){
+            for(int j = 0; j < cells[0].length; j++){
+                updateColor(squares[i][j],cells[i][j].getGrainNumber());
+            }
+        }
+        
+    }
+
+    private void colorsEnergy() {
+        Cell[][] cells = grainGrowth.getCells();
+        for(int i = 0; i < cells.length; i++){
+            for(int j = 0; j < cells[0].length; j++){
+                System.out.println("colorEnergy");
+                updateColorEnergy(squares[i][j],cells[i][j].isChanged());
+            }
+        }
+        
+    }
+
     private boolean validateInputs(BoundaryCondition boundaryCondition, NucleationType nucleationType,
                                    NeighborhoodType neighborhoodType, int n, int m, int homogeneousColumns,
                                    int homogeneousRows, int numOfGrains, double radiusNucleation, double radiusNeighborhood) {
@@ -136,7 +186,8 @@ public class GrainGrowthController implements Initializable {
         } else if (numOfGrains <= 0 || numOfGrains > n * m) {
             printError("wrong number of grains");
             return false;
-        } else if (radiusNeighborhood <= 1 || radiusNucleation <= 1) {
+        } else if (radiusNeighborhood <= 1 || radiusNucleation <= 1 || radiusNucleation >= n || radiusNucleation >=m
+        || radiusNeighborhood >= n || radiusNucleation >=m) {
             printError("wrong radius");
             return false;
         }
@@ -169,6 +220,8 @@ public class GrainGrowthController implements Initializable {
         grainGrowth.resizeGrid(n, m);
         Grid grid = grainGrowth.getGrid();
         cleanVisualizationPane();
+        System.out.println(visualizationGridPane.getWidth());
+        System.out.println(visualizationGridPane.getHeight());
         double width = visualizationGridPane.getWidth() / (double) m;
         double height = visualizationGridPane.getHeight() / (double) n;
 
@@ -176,6 +229,7 @@ public class GrainGrowthController implements Initializable {
         for (int i = 0; i < n; i++)
             for (int j = 0; j < m; j++) {
                 StackPane square = new StackPane();
+                squares[i][j] = square;
                 square.setMinSize(size, size);
                 makeBorderOnSquare(square);
                 final int ii = i;
@@ -185,11 +239,21 @@ public class GrainGrowthController implements Initializable {
                         grid.updateCell(ii, jj);
                 });
                 grid.getCell(i, j).aliveProperty().addListener((e) -> {
-                    updateColor(square, grid.getCell(ii, jj).getGrainNumber());
+                    if(visualizationType.equals(VisualizationType.Microstructure))
+                        updateColor(square, grid.getCell(ii, jj).getGrainNumber());
+                    else
+                        updateColorEnergy(square, grid.getCell(ii,jj).isChanged());
                 });
                 visualizationGridPane.add(square, j, i);
             }
 
+    }
+
+    private void updateColorEnergy(StackPane square, boolean isChanged) {
+        if(isChanged)
+            square.setStyle("-fx-background-color: rgb(0,0,0)");
+        else
+            square.setStyle("-fx-background-color: rgb(255,255,255)");
     }
 
     private void cleanVisualizationPane() {

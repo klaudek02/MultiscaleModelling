@@ -1,6 +1,8 @@
 package visualization;
 
 
+import javafx.scene.text.Text;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -45,8 +47,6 @@ public class Grid {
     }
 
     public boolean nextGeneration() {
-        pentagonalRandom = generator.nextInt(4);
-        hexagonalRandom = generator.nextInt(2);
         noChanges = true;
         goToNextState(calculateNextState());
         return noChanges;
@@ -131,6 +131,8 @@ public class Grid {
                 );
             }
             case Pentagonal_Random: {
+                int pentagonalRandom = generator.nextInt(4);
+
                 switch (pentagonalRandom) {
                     case 0:
                         return pentagonalLeft(north, east, south, west, columnIndex, rowIndex);
@@ -149,6 +151,8 @@ public class Grid {
                 return hexagonalRight(north, east, south, west, columnIndex, rowIndex);
             }
             case Hexagonal_Random: {
+                int hexagonalRandom = generator.nextInt(2);
+
                 switch (hexagonalRandom) {
                     case 0:
                         return hexagonalLeft(north, east, south, west, columnIndex, rowIndex);
@@ -178,28 +182,29 @@ public class Grid {
                     long energyBefore = neighboursFiltered.size();
                     int newNumber = neighboursNumbers.get(generator.nextInt(neighboursNumbers.size()));
                     long energyAfter = neighbours.stream().filter(c -> newNumber != c.getGrainNumber()).count();
-                    if (energyBefore - energyAfter >= 0) {
+                    cell.setEnergy(energyBefore - energyAfter);
+                    if (cell.getEnergy() >= 0) {
+                        cell.setChanged(true);
                         cell.setGrainNumber(newNumber);
                     }
                 }
             }
         }
         for (int i = 0; i < getNumberOfRows(); i++)
-            for (int j = 0; j < getNumberOfColumns(); j++)
+            for (int j = 0; j < getNumberOfColumns(); j++) {
                 getCell(i, j).negateAlive();
+            }
     }
 
     private List<Cell> radiusWithCenterOfGravity(int columnIndex, int rowIndex) {
         List<Cell> neighbours = new LinkedList<>();
-        Cell cell, cell2;
+        Cell cell;
         for (double x = rowIndex - radiusNeighborhood; x <= rowIndex + radiusNeighborhood; x++) {
             for (double y = columnIndex - radiusNeighborhood; y <= columnIndex + radiusNeighborhood; y++) {
 
                 cell = getCell((int) x, (int) y);
-                //  cell2 = getCell(rowIndex,columnIndex);
                 if (cell.isAlive()) {
                     double lineLength = calculateLineLengthCG(rowIndex, columnIndex, (int) x, (int) y);
-
                     if (lineLength <= radiusNeighborhood) {
                         neighbours.add(cell);
                     }
@@ -332,8 +337,9 @@ public class Grid {
 
     }
 
-    public void setGrainsWithRadius(int numberOfGrains) {
+    public void setGrainsWithRadius(int numberOfGrains, Text errorText) {
         int failedCounter = 0;
+        int number = 0;
         boolean valid = true;
         for (int i = 1; i <= numberOfGrains; i++) {
             int x1 = generator.nextInt(numberOfRows);
@@ -355,6 +361,7 @@ public class Grid {
                     i--;
                     failedCounter++;
                 } else {
+                    number++;
                     failedCounter = 0;
                     cells[x1][y1].setGrainNumber(i);
                     cells[x1][y1].negateAlive();
@@ -366,6 +373,8 @@ public class Grid {
 
             if (failedCounter == 10000) break;
         }
+        if(numberOfGrains != number)
+            errorText.setText("Wygenerowano: " + number + " zarodkow");
     }
 
     public boolean setColorIdOnClick(int ii, int jj) {
@@ -437,6 +446,9 @@ public class Grid {
 
     public void setNucleationType(NucleationType nucleationType) {
         this.nucleationType = nucleationType;
+    }
+    public Cell[][] getCells(){
+        return cells;
     }
 }
 
