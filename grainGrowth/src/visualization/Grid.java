@@ -6,7 +6,6 @@ import javafx.scene.text.Text;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class Grid {
 
@@ -24,8 +23,6 @@ public class Grid {
     private Random generator;
     private double radiusNucleation;
     private double radiusNeighborhood;
-    private int pentagonalRandom;
-    private int hexagonalRandom;
     private boolean noChanges = true;
 
     public Grid(int n, int m) {
@@ -36,9 +33,11 @@ public class Grid {
     void initializeCells() {
         cells = new Cell[numberOfRows][numberOfColumns];
         oldState = new boolean[numberOfRows][numberOfColumns];
+        int id = 1;
         for (int i = 0; i < numberOfRows; i++)
             for (int j = 0; j < numberOfColumns; j++) {
                 cells[i][j] = new Cell(generator.nextDouble() + i, generator.nextDouble() + j);
+                cells[i][j].setId(id++);
             }
     }
 
@@ -182,18 +181,24 @@ public class Grid {
                     long energyBefore = neighboursFiltered.size();
                     int newNumber = neighboursNumbers.get(generator.nextInt(neighboursNumbers.size()));
                     long energyAfter = neighbours.stream().filter(c -> newNumber != c.getGrainNumber()).count();
+                    boolean changed = cell.isChanged();
                     cell.setEnergy(energyBefore - energyAfter);
                     if (cell.getEnergy() >= 0) {
                         cell.setChanged(true);
                         cell.setGrainNumber(newNumber);
+                        cell.negateAlive();
                     }
+
+                }else{
+                    cell.setChanged(false);
+                    cell.negateAlive();
                 }
             }
         }
-        for (int i = 0; i < getNumberOfRows(); i++)
-            for (int j = 0; j < getNumberOfColumns(); j++) {
-                getCell(i, j).negateAlive();
-            }
+     //   for (int i = 0; i < getNumberOfRows(); i++)
+     //       for (int j = 0; j < getNumberOfColumns(); j++) {
+     //           getCell(i, j).negateAlive();
+      //      }
     }
 
     private List<Cell> radiusWithCenterOfGravity(int columnIndex, int rowIndex) {

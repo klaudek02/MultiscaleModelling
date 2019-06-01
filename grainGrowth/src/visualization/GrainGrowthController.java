@@ -1,21 +1,20 @@
 package visualization;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 
-import java.math.BigDecimal;
 import java.net.URL;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Random;
+import java.util.ResourceBundle;
+import java.util.Set;
 
 public class GrainGrowthController implements Initializable {
 
@@ -58,7 +57,7 @@ public class GrainGrowthController implements Initializable {
     @FXML
     private ComboBox<NeighborhoodType> neighborhoodMC;
     @FXML
-    private ToggleButton switchVisualization;
+    private ComboBox<VisualizationType> switchVisualization;
 
     private GrainGrowth grainGrowth;
     private VisualizationType visualizationType = VisualizationType.Microstructure;
@@ -73,14 +72,15 @@ public class GrainGrowthController implements Initializable {
         nucleationTypes.setItems(FXCollections.observableArrayList(NucleationType.values()));
         growthTypes.setItems(FXCollections.observableArrayList(NeighborhoodType.values()));
         neighborhoodMC.setItems(FXCollections.observableArrayList(NeighborhoodType.Moore, NeighborhoodType.VonNeumann));
+        switchVisualization.setItems(FXCollections.observableArrayList(VisualizationType.values()));
         stopButton.setOnAction(e -> grainGrowth.stopGame());
         switchVisualization.setOnAction(e->{
-            grainGrowth.stopGame();
-            if(switchVisualization.isSelected()){
-                visualizationType = VisualizationType.Energy;
-            }else
-                visualizationType = VisualizationType.Microstructure;
-            changeColorsOnBoard();
+            System.out.println("now");
+            if(grainGrowth.isPlayable()){
+                grainGrowth.stopGame();
+                visualizationType = switchVisualization.getValue();
+                changeColorsOnBoard();
+            }
         });
         monteCarlo.setOnAction(e -> {
             try {
@@ -146,9 +146,21 @@ public class GrainGrowthController implements Initializable {
             case Energy:
                 colorsEnergy();
                 break;
+            case DensityOfDislocation:
+                colorsDensity();
+                break;
                 
         }
     }
+
+    private void colorsDensity() {
+        Cell[][] cells = grainGrowth.getCells();
+        for(int i = 0; i < cells.length; i++)
+            for(int j = 0; j < cells[0].length;j++)
+                updateColorDensity(squares[i][j],cells[i][j].isCrystalized(), cells[i][j].getDensity());
+    }
+
+
 
     private void colorsMicrostructure() {
         Cell[][] cells = grainGrowth.getCells();
@@ -164,11 +176,9 @@ public class GrainGrowthController implements Initializable {
         Cell[][] cells = grainGrowth.getCells();
         for(int i = 0; i < cells.length; i++){
             for(int j = 0; j < cells[0].length; j++){
-                System.out.println("colorEnergy");
                 updateColorEnergy(squares[i][j],cells[i][j].isChanged());
             }
         }
-        
     }
 
     private boolean validateInputs(BoundaryCondition boundaryCondition, NucleationType nucleationType,
@@ -224,7 +234,6 @@ public class GrainGrowthController implements Initializable {
         System.out.println(visualizationGridPane.getHeight());
         double width = visualizationGridPane.getWidth() / (double) m;
         double height = visualizationGridPane.getHeight() / (double) n;
-
         double size = (int)(width > height ? height : width);
         for (int i = 0; i < n; i++)
             for (int j = 0; j < m; j++) {
@@ -265,8 +274,12 @@ public class GrainGrowthController implements Initializable {
         while (visualizationGridPane.getColumnConstraints().size() > 0) {
             visualizationGridPane.getColumnConstraints().remove(0);
         }
-
-
+    }
+    private void updateColorDensity(StackPane square, boolean crystalized, double density) {
+        if(crystalized)
+            square.setStyle("-fx-background-color: rgb(0,205,255)");
+        else
+            square.setStyle("-fx-background-color: rgb(0,255,255)");
     }
 
     private void updateColor(StackPane square, int numberOfGrain) {

@@ -5,12 +5,15 @@ import javafx.beans.property.SimpleBooleanProperty;
 
 public class Cell {
 
+    private int id;
     private final BooleanProperty alive = new SimpleBooleanProperty(false);
     private int grainNumber = 0;
     private double centerOfGravityX;
     private double centerOfGravityY;
     private double energy = 0;
     private boolean changed = false;
+    private double density;
+    private boolean crystalized = false;
 
     public Cell(double centerOfGravityX, double centerOfGravityY) {
         this.centerOfGravityX = centerOfGravityX;
@@ -62,6 +65,30 @@ public class Cell {
 
     public void setChanged(boolean changed) {
         this.changed = changed;
+    }
+
+    public double getDensity() {
+        return density;
+    }
+
+    public void setDensity(double density) {
+        this.density = density;
+    }
+
+    public boolean isCrystalized() {
+        return crystalized;
+    }
+
+    public void setCrystalized(boolean crystalized) {
+        this.crystalized = crystalized;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
 

@@ -8,9 +8,6 @@ import javafx.event.EventHandler;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
-import java.security.Key;
-import java.sql.Time;
-
 public class GrainGrowth {
 
     private final Grid grid;
@@ -120,5 +117,9 @@ public class GrainGrowth {
             grid.setNeighborhoodType(neighborhoodType);
             setTimelineMonteCarlo(kt, iterations);
         }
+    }
+
+    public boolean isPlayable() {
+        return playable;
     }
 }

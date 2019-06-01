@@ -2,5 +2,6 @@ package visualization;
 
 public enum VisualizationType {
     Microstructure,
-    Energy
+    Energy,
+    DensityOfDislocation
 }
