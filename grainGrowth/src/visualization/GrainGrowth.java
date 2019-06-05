@@ -20,6 +20,8 @@ public class GrainGrowth {
     private int radius;
     private boolean finished = false;
     private Text errorText;
+    private boolean monteCarloRun;
+
     public GrainGrowth(int n, int m, Text errorText) {
         grid = new Grid(n, m);
         this.errorText = errorText;
@@ -34,16 +36,28 @@ public class GrainGrowth {
         timeline = new Timeline(keyFrame);
         timeline.setCycleCount(Animation.INDEFINITE);
     }
-    private void setTimelineMonteCarlo(int kt, int iterations){
+    private void setTimelineMonteCarlo(double kt, int iterations){
         EventHandler<ActionEvent> eventHandler = event-> {nextMonteCarlo(kt);};
         KeyFrame keyFrame = new KeyFrame(new Duration(1000), eventHandler);
         timeline = new Timeline(keyFrame);
         timeline.setCycleCount(iterations);
         timeline.play();
     }
+    private void setTimelineDRX(int iterations) {
+        EventHandler<ActionEvent> eventHandler = event->nextDRX();
+        KeyFrame keyFrame = new KeyFrame(new Duration(1000), eventHandler);
+        timeline = new Timeline(keyFrame);
+        timeline.setCycleCount(iterations);
+        timeline.play();
+    }
 
-    private void nextMonteCarlo(int kt) {
-        grid.nextMonteCarlo();
+    private void nextDRX() {
+        grid.nextDRX();
+    }
+
+    private void nextMonteCarlo(double kt) {
+        grid.nextMonteCarlo(kt);
+        monteCarloRun = true;
     }
 
     public void resizeGrid(int n, int m) {
@@ -111,7 +125,7 @@ public class GrainGrowth {
         this.playable = true;
     }
 
-    public void monteCarlo(NeighborhoodType neighborhoodType, int kt, int iterations) {
+    public void monteCarlo(NeighborhoodType neighborhoodType, double kt, int iterations) {
         if(finished) {
             System.out.println("started MonteCarlo");
             grid.setNeighborhoodType(neighborhoodType);
@@ -121,5 +135,16 @@ public class GrainGrowth {
 
     public boolean isPlayable() {
         return playable;
+    }
+
+    public void drx(int iterations) {
+        if(monteCarloRun) {
+            timeline.stop();
+            grid.setNeighborhoodType(NeighborhoodType.VonNeumann);
+            grid.clearDislocation();
+            System.out.println("DRX started");
+            grid.calculateDislocation(iterations);
+            setTimelineDRX(iterations);
+        }
     }
 }

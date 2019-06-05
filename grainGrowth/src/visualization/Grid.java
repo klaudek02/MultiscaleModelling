@@ -3,6 +3,8 @@ package visualization;
 
 import javafx.scene.text.Text;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -10,6 +12,7 @@ import java.util.stream.IntStream;
 public class Grid {
 
     private Cell[][] cells;
+    private double[] dislocation;
     private int numberOfRows;
     private int numberOfColumns;
     private BoundaryCondition boundaryCondition;
@@ -24,10 +27,12 @@ public class Grid {
     private double radiusNucleation;
     private double radiusNeighborhood;
     private boolean noChanges = true;
-
+    private int drxIteration = 1;
+    private List<Cell> borderCells;
     public Grid(int n, int m) {
         generator = new Random();
         resize(n, m);
+        borderCells = new LinkedList<>();
     }
 
     void initializeCells() {
@@ -131,7 +136,6 @@ public class Grid {
             }
             case Pentagonal_Random: {
                 int pentagonalRandom = generator.nextInt(4);
-
                 switch (pentagonalRandom) {
                     case 0:
                         return pentagonalLeft(north, east, south, west, columnIndex, rowIndex);
@@ -164,13 +168,10 @@ public class Grid {
             }
             default:
                 return Arrays.asList();
-
         }
-
-
     }
 
-    public void nextMonteCarlo() {
+    public void nextMonteCarlo(double kt) {
         for (int i = 0; i < getNumberOfRows(); i++) {
             for (int j = 0; j < getNumberOfColumns(); j++) {
                 Cell cell = getCell(i, j);
@@ -181,24 +182,131 @@ public class Grid {
                     long energyBefore = neighboursFiltered.size();
                     int newNumber = neighboursNumbers.get(generator.nextInt(neighboursNumbers.size()));
                     long energyAfter = neighbours.stream().filter(c -> newNumber != c.getGrainNumber()).count();
-                    boolean changed = cell.isChanged();
-                    cell.setEnergy(energyBefore - energyAfter);
-                    if (cell.getEnergy() >= 0) {
+                    cell.setEnergy(energyAfter - energyBefore);
+                    if (cell.getEnergy() <= 0) {
                         cell.setChanged(true);
+                        borderCells.add(cell);
                         cell.setGrainNumber(newNumber);
                         cell.negateAlive();
+                    } else {
+                        double p = Math.exp(-cell.getEnergy() / kt);
+                        double percent = Math.random();
+                        if (percent < p) {
+                            cell.setChanged(true);
+                            borderCells.add(cell);
+                            cell.setGrainNumber(newNumber);
+                            cell.negateAlive();
+                        }
                     }
-
-                }else{
+                } else {
                     cell.setChanged(false);
+                    borderCells.remove(cell);
                     cell.negateAlive();
                 }
             }
         }
-     //   for (int i = 0; i < getNumberOfRows(); i++)
-     //       for (int j = 0; j < getNumberOfColumns(); j++) {
-     //           getCell(i, j).negateAlive();
-      //      }
+    }
+    public void nextDRX() {
+        double deltaRo = dislocation[drxIteration] - dislocation[(drxIteration++) - 1];
+        double averageRo = Math.abs(deltaRo / (double)(numberOfColumns * numberOfRows));
+        double percentOfRo = DRXConsts.DISTRIBUTION_PERCENT.getValue() * averageRo;
+        double criticalRo = DRXConsts.CRITICAL_RO.getValue() /(double)(numberOfColumns * numberOfRows);
+        System.out.println("I: " + percentOfRo);
+        for (int i = 0; i < numberOfRows; i++) {
+            for (int j = 0; j < numberOfColumns; j++) {
+                getCell(i, j).addDensity(percentOfRo);
+                deltaRo -= percentOfRo;
+            }
+        }
+        percentOfRo = deltaRo/100;
+        int n;
+        int m;
+        while (deltaRo >= 0) {
+            Cell cell;
+            double percent = Math.random();
+            if(percent < 0.8){
+                cell = borderCells.get(generator.nextInt(borderCells.size()));
+            }else {
+                while(true) {
+                    n = generator.nextInt(numberOfRows);
+                    m = generator.nextInt(numberOfColumns);
+                    cell = getCell(n, m);
+                    if (borderCells.contains(cell)) {
+                        continue;
+                    }
+                    break;
+                }
+            }
+            deltaRo -= percentOfRo;
+            cell.addDensity(percentOfRo);
+        }
+        for (int i = 0; i < numberOfRows; i++) {
+            for (int j = 0; j < numberOfColumns; j++) {
+                Cell cell = getCell(i, j);
+                if (cell.getDensity() > criticalRo && cell.isChanged()) {
+                    cell.setCrystalized(true);
+                    cell.setDensity(0);
+                    cell.negateAlive();
+                }
+            }
+        }
+        transitionRule();
+        if(drxIteration >= dislocation.length){
+            try {
+                saveDislocationToFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+    }
+
+    private void saveDislocationToFile() throws IOException {
+        FileWriter csvWriter = new FileWriter("new.csv");
+        csvWriter.append("time");
+        csvWriter.append(";");
+        csvWriter.append("density");
+        csvWriter.append("\n");
+        int time = 0;
+        for(int i = 0; i < dislocation.length; i++){
+            csvWriter.append(time++ + ";" + dislocation[i]);
+            csvWriter.append("\n");
+        }
+        csvWriter.flush();
+        csvWriter.close();
+
+
+    }
+
+    private void transitionRule() {
+        for(int i = 0; i < numberOfRows; i++){
+            for(int j = 0; j < numberOfColumns; j++) {
+                Cell concreteCell = getCell(i,j);
+               // if(concreteCell.isChanged()) {
+                    List<Cell> neighbours = getNeighbours(i, j);
+                    long neighboursCrystalized = neighbours.stream().filter(Cell::isCrystalized).count();
+                    long neighboursDensity = neighbours.stream().filter(cell -> !cell.isCrystalized() && cell.getDensity() < concreteCell.getDensity()).count();
+                    if (neighboursCrystalized >0 && neighboursCrystalized + neighboursDensity == 4) {
+                        concreteCell.setCrystalized(true);
+                        concreteCell.setDensity(0);
+                        concreteCell.negateAlive();
+                    }
+               // }
+            }
+        }
+    }
+
+
+    public void calculateDislocation(int iterations) {
+        final double A = DRXConsts.A.getValue();
+        final double B = DRXConsts.B.getValue();
+        dislocation = new double[iterations+1];
+        dislocation[0] = 1;
+        int i = 1;
+        for (double t = 0.001; t < (iterations+1) / 1000.0; t += 0.001) {
+            dislocation[i++] = A/B+((1.0 - (A / B))*Math.exp(-B*t));
+        }
     }
 
     private List<Cell> radiusWithCenterOfGravity(int columnIndex, int rowIndex) {
@@ -206,7 +314,6 @@ public class Grid {
         Cell cell;
         for (double x = rowIndex - radiusNeighborhood; x <= rowIndex + radiusNeighborhood; x++) {
             for (double y = columnIndex - radiusNeighborhood; y <= columnIndex + radiusNeighborhood; y++) {
-
                 cell = getCell((int) x, (int) y);
                 if (cell.isAlive()) {
                     double lineLength = calculateLineLengthCG(rowIndex, columnIndex, (int) x, (int) y);
@@ -214,7 +321,6 @@ public class Grid {
                         neighbours.add(cell);
                     }
                 }
-
             }
         }
         return neighbours;
@@ -378,7 +484,7 @@ public class Grid {
 
             if (failedCounter == 10000) break;
         }
-        if(numberOfGrains != number)
+        if (numberOfGrains != number)
             errorText.setText("Wygenerowano: " + number + " zarodkow");
     }
 
@@ -452,8 +558,20 @@ public class Grid {
     public void setNucleationType(NucleationType nucleationType) {
         this.nucleationType = nucleationType;
     }
-    public Cell[][] getCells(){
+
+    public Cell[][] getCells() {
         return cells;
+    }
+
+    public void clearDislocation() {
+        for(int i = 0 ; i < numberOfRows; i++){
+            for(int j = 0; j < numberOfColumns; j++){
+                getCell(i,j).setDensity(0);
+                getCell(i,j).setCrystalized(false);
+                getCell(i,j).negateAlive();
+                drxIteration = 1;
+            }
+        }
     }
 }
 

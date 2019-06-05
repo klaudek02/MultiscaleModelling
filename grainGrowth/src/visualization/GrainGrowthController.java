@@ -55,6 +55,8 @@ public class GrainGrowthController implements Initializable {
     @FXML
     private Button monteCarlo;
     @FXML
+    private Button drx;
+    @FXML
     private ComboBox<NeighborhoodType> neighborhoodMC;
     @FXML
     private ComboBox<VisualizationType> switchVisualization;
@@ -84,15 +86,24 @@ public class GrainGrowthController implements Initializable {
         });
         monteCarlo.setOnAction(e -> {
             try {
-                int kt = Integer.parseInt(ktMC.getText());
+                double kt = Double.parseDouble(ktMC.getText());
                 int iterations = Integer.parseInt(iterationsMC.getText());
                 NeighborhoodType neighborhoodType = neighborhoodMC.getValue();
-                if (neighborhoodType != null)
+                if (neighborhoodType != null && kt >= -6 && kt <= 0.6)
                     grainGrowth.monteCarlo(neighborhoodType, kt, iterations);
                 else
                     printError("select neighborhood for MC");
             } catch (Exception exception) {
                 printError("wrong input for MC");
+            }
+        });
+        drx.setOnAction(e->{
+            try{
+                int iterations = Integer.parseInt(iterationsMC.getText());
+                printError("");
+                grainGrowth.drx(iterations);
+            }catch (Exception exception){
+                printError("wrong input for DRX");
             }
         });
         resumeButton.setOnAction(e -> grainGrowth.playGame());
@@ -157,7 +168,7 @@ public class GrainGrowthController implements Initializable {
         Cell[][] cells = grainGrowth.getCells();
         for(int i = 0; i < cells.length; i++)
             for(int j = 0; j < cells[0].length;j++)
-                updateColorDensity(squares[i][j],cells[i][j].isCrystalized(), cells[i][j].getDensity());
+                updateColorDensity(squares[i][j],cells[i][j].isCrystalized());
     }
 
 
@@ -166,7 +177,10 @@ public class GrainGrowthController implements Initializable {
         Cell[][] cells = grainGrowth.getCells();
         for(int i = 0; i < cells.length; i++){
             for(int j = 0; j < cells[0].length; j++){
-                updateColor(squares[i][j],cells[i][j].getGrainNumber());
+                if(cells[i][j].isCrystalized()) {
+                    updateColor(squares[i][j], "rgb(0,205,255)");
+                }
+                else updateColor(squares[i][j],grainColors[cells[i][j].getGrainNumber()]);
             }
         }
         
@@ -248,8 +262,13 @@ public class GrainGrowthController implements Initializable {
                         grid.updateCell(ii, jj);
                 });
                 grid.getCell(i, j).aliveProperty().addListener((e) -> {
-                    if(visualizationType.equals(VisualizationType.Microstructure))
-                        updateColor(square, grid.getCell(ii, jj).getGrainNumber());
+                    if(visualizationType.equals(VisualizationType.Microstructure) && grid.getCell(ii,jj).isCrystalized()) {
+                        updateColor(square, "rgb(0,205,255)");
+                    }
+                    else if(visualizationType.equals(VisualizationType.Microstructure))
+                        updateColor(square, grainColors[grid.getCell(ii, jj).getGrainNumber()]);
+                    else if(visualizationType.equals(VisualizationType.DensityOfDislocation))
+                        updateColorDensity(square, grid.getCell(ii,jj).isCrystalized());
                     else
                         updateColorEnergy(square, grid.getCell(ii,jj).isChanged());
                 });
@@ -275,15 +294,14 @@ public class GrainGrowthController implements Initializable {
             visualizationGridPane.getColumnConstraints().remove(0);
         }
     }
-    private void updateColorDensity(StackPane square, boolean crystalized, double density) {
+    private void updateColorDensity(StackPane square, boolean crystalized) {
         if(crystalized)
             square.setStyle("-fx-background-color: rgb(0,205,255)");
         else
-            square.setStyle("-fx-background-color: rgb(0,255,255)");
+            square.setStyle("-fx-background-color: rgb(255,255,255)");
     }
 
-    private void updateColor(StackPane square, int numberOfGrain) {
-        String colorRGB = grainColors[numberOfGrain];
+    private void updateColor(StackPane square, String colorRGB) {
         square.setStyle("-fx-background-color: " + colorRGB);
     }
 

@@ -71,10 +71,12 @@ public class Cell {
         return density;
     }
 
-    public void setDensity(double density) {
+    public void addDensity(double density) {
+        this.density+=density;
+    }
+    public void setDensity(double density){
         this.density = density;
     }
-
     public boolean isCrystalized() {
         return crystalized;
     }
