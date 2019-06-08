@@ -1,5 +1,5 @@
 # MultiscaleModelling
-Three project in JavaFX
+Three projects in JavaFX with XML view
 - Conway's Game of Life
 - Cellular Automaton rules 
 - Grain growth algorithm with Monte Carlo and Disclocation-DRX algorithm:<br>
