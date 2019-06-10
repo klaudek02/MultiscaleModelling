@@ -89,7 +89,7 @@ public class GrainGrowthController implements Initializable {
                 double kt = Double.parseDouble(ktMC.getText());
                 int iterations = Integer.parseInt(iterationsMC.getText());
                 NeighborhoodType neighborhoodType = neighborhoodMC.getValue();
-                if (neighborhoodType != null && kt >= -6 && kt <= 0.6)
+                if (neighborhoodType != null && kt <= 6 && kt >= 0.1)
                     grainGrowth.monteCarlo(neighborhoodType, kt, iterations);
                 else
                     printError("select neighborhood for MC");
@@ -178,7 +178,7 @@ public class GrainGrowthController implements Initializable {
         for(int i = 0; i < cells.length; i++){
             for(int j = 0; j < cells[0].length; j++){
                 if(cells[i][j].isCrystalized()) {
-                    updateColor(squares[i][j], "rgb(0,205,255)");
+                    updateColor(squares[i][j], "rgb(255,0,0)");
                 }
                 else updateColor(squares[i][j],grainColors[cells[i][j].getGrainNumber()]);
             }
@@ -263,7 +263,7 @@ public class GrainGrowthController implements Initializable {
                 });
                 grid.getCell(i, j).aliveProperty().addListener((e) -> {
                     if(visualizationType.equals(VisualizationType.Microstructure) && grid.getCell(ii,jj).isCrystalized()) {
-                        updateColor(square, "rgb(0,205,255)");
+                        updateColor(square, "rgb(255,0,0)");
                     }
                     else if(visualizationType.equals(VisualizationType.Microstructure))
                         updateColor(square, grainColors[grid.getCell(ii, jj).getGrainNumber()]);
@@ -296,7 +296,7 @@ public class GrainGrowthController implements Initializable {
     }
     private void updateColorDensity(StackPane square, boolean crystalized) {
         if(crystalized)
-            square.setStyle("-fx-background-color: rgb(0,205,255)");
+            square.setStyle("-fx-background-color: rgb(255,0,0)");
         else
             square.setStyle("-fx-background-color: rgb(255,255,255)");
     }

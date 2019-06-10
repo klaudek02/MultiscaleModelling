@@ -21,6 +21,7 @@ public class GrainGrowth {
     private boolean finished = false;
     private Text errorText;
     private boolean monteCarloRun;
+    private boolean drxBool;
 
     public GrainGrowth(int n, int m, Text errorText) {
         grid = new Grid(n, m);
@@ -85,8 +86,22 @@ public class GrainGrowth {
         if(playable)timeline.play();
     }
     public void stopGame() {
+        if(drxBool){
+            System.out.println("tru");
+            timeline.stop();
+            setTimelineLAST();
+        }
        if(playable)timeline.stop();
     }
+
+    private void setTimelineLAST() {
+        EventHandler<ActionEvent> eventHandler = event->grid.transitionRule();
+        KeyFrame keyFrame = new KeyFrame(new Duration(1000), eventHandler);
+        timeline = new Timeline(keyFrame);
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
+    }
+
     public void setInstance(int numberOfGrains, BoundaryCondition boundaryCondition,
                             NucleationType nucleationType, NeighborhoodType neighborhoodType,
                             int homogeneousRows, int homogeneousColumns, double radiusNucleation, double radiusNeighborhood) {
@@ -139,6 +154,7 @@ public class GrainGrowth {
 
     public void drx(int iterations) {
         if(monteCarloRun) {
+            drxBool = true;
             timeline.stop();
             grid.setNeighborhoodType(NeighborhoodType.VonNeumann);
             grid.clearDislocation();

@@ -177,7 +177,7 @@ public class Grid {
                 Cell cell = getCell(i, j);
                 List<Cell> neighbours = getNeighbours(i, j);
                 List<Cell> neighboursFiltered = neighbours.stream().filter(c -> c.getGrainNumber() != cell.getGrainNumber()).collect(Collectors.toList());
-                List<Integer> neighboursNumbers = neighboursFiltered.stream().filter(c -> c.getGrainNumber() != 0).map(c -> c.getGrainNumber()).collect(Collectors.toList());
+                List<Integer> neighboursNumbers = neighboursFiltered.stream().filter(c -> c.getGrainNumber() != 0).map(Cell::getGrainNumber).collect(Collectors.toList());
                 if (neighboursNumbers.size() > 1) {
                     long energyBefore = neighboursFiltered.size();
                     int newNumber = neighboursNumbers.get(generator.nextInt(neighboursNumbers.size()));
@@ -208,10 +208,9 @@ public class Grid {
     }
     public void nextDRX() {
         double deltaRo = dislocation[drxIteration] - dislocation[(drxIteration++) - 1];
-        double averageRo = Math.abs(deltaRo / (double)(numberOfColumns * numberOfRows));
+        double averageRo = Math.abs(deltaRo / (numberOfColumns * numberOfRows));
         double percentOfRo = DRXConsts.DISTRIBUTION_PERCENT.getValue() * averageRo;
-        double criticalRo = DRXConsts.CRITICAL_RO.getValue() /(double)(numberOfColumns * numberOfRows);
-        System.out.println("I: " + percentOfRo);
+        double criticalRo = DRXConsts.CRITICAL_RO.getValue() /(numberOfColumns * numberOfRows);
         for (int i = 0; i < numberOfRows; i++) {
             for (int j = 0; j < numberOfColumns; j++) {
                 getCell(i, j).addDensity(percentOfRo);
@@ -219,8 +218,6 @@ public class Grid {
             }
         }
         percentOfRo = deltaRo/100;
-        int n;
-        int m;
         while (deltaRo >= 0) {
             Cell cell;
             double percent = Math.random();
@@ -228,8 +225,8 @@ public class Grid {
                 cell = borderCells.get(generator.nextInt(borderCells.size()));
             }else {
                 while(true) {
-                    n = generator.nextInt(numberOfRows);
-                    m = generator.nextInt(numberOfColumns);
+                    int n = generator.nextInt(numberOfRows);
+                    int m = generator.nextInt(numberOfColumns);
                     cell = getCell(n, m);
                     if (borderCells.contains(cell)) {
                         continue;
@@ -251,9 +248,10 @@ public class Grid {
             }
         }
         transitionRule();
+
         if(drxIteration >= dislocation.length){
-            try {
-                saveDislocationToFile();
+            try(FileWriter csvWriter = new FileWriter("new.csv")){
+                saveDislocationToFile(csvWriter);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -262,8 +260,7 @@ public class Grid {
 
     }
 
-    private void saveDislocationToFile() throws IOException {
-        FileWriter csvWriter = new FileWriter("new.csv");
+    private void saveDislocationToFile(FileWriter csvWriter) throws IOException {
         csvWriter.append("time");
         csvWriter.append(";");
         csvWriter.append("density");
@@ -274,25 +271,21 @@ public class Grid {
             csvWriter.append("\n");
         }
         csvWriter.flush();
-        csvWriter.close();
-
-
     }
 
-    private void transitionRule() {
+    public void transitionRule() {
         for(int i = 0; i < numberOfRows; i++){
             for(int j = 0; j < numberOfColumns; j++) {
                 Cell concreteCell = getCell(i,j);
-               // if(concreteCell.isChanged()) {
                     List<Cell> neighbours = getNeighbours(i, j);
-                    long neighboursCrystalized = neighbours.stream().filter(Cell::isCrystalized).count();
+                    long neighboursCrystallized = neighbours.stream().filter(Cell::isCrystalized).count();
                     long neighboursDensity = neighbours.stream().filter(cell -> !cell.isCrystalized() && cell.getDensity() < concreteCell.getDensity()).count();
-                    if (neighboursCrystalized >0 && neighboursCrystalized + neighboursDensity == 4) {
+                    if (neighboursCrystallized >0 && neighboursCrystallized + neighboursDensity == 4) {
+                        System.out.println("tR");
                         concreteCell.setCrystalized(true);
                         concreteCell.setDensity(0);
                         concreteCell.negateAlive();
                     }
-               // }
             }
         }
     }
